@@ -1,0 +1,22 @@
+name: collect
+on:
+  schedule: [{ cron: '10 * * * *' }]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node scripts/collect.mjs
+        env:
+          HRFCO_KEY: ${{ secrets.HRFCO_KEY }}
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+      - run: |
+          git config user.name github-actions
+          git config user.email actions@users.noreply.github.com
+          git add data/live.json
+          git diff --cached --quiet || (git commit -m "data: update live.json" && git push)

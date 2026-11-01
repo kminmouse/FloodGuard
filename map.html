@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+    <title>FloodGuard 위험 지도</title>
+</head>
+
+<body>
+    <main>
+        <h2>침수 위험 지도 <span id="b"></span></h2>
+        <input id="q" placeholder="관측소 검색 (예: 한강대교)">
+        <div id="map"></div>
+        <div class="card">
+            <table id="lst"></table>
+        </div>
+        <p class="note">마커 색: 초록 안전 · 노랑 관심 · 주황 주의 · 빨강 위험</p>
+    </main>
+    <script type="module">
+        import {load, shell, badge, rows, lvTag} from './js/app.js'; import {KAKAO_JS_KEY} from './js/config.js';
+        shell('map.html'); const d = await load(), $ = id => document.getElementById(id); $('b').innerHTML = badge(d);
+        const R = d ? rows(d) : [];
+        $('lst').innerHTML = R.length ? '<tr><th>관측소</th><th>점수</th><th>단계</th><th>수위(m)</th><th>시간강수(mm)</th></tr>' + R.map(r => `<tr><td>${r.name}</td><td>${r.score.toFixed(0)}</td><td>${lvTag(r.lv)}</td><td>${r.wl ?? '—'}</td><td>${r.rain1h ?? '—'}</td></tr>`).join('') : '데이터가 없습니다.';
+        if (!KAKAO_JS_KEY) {$('map').innerHTML = '<p class="note" style="padding:16px">js/config.js에 Kakao JavaScript 키를 입력하면 지도가 표시됩니다.</p>'} else {
+            await new Promise((ok, no) => {const s = document.createElement('script'); s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`; s.onload = ok; s.onerror = no; document.head.append(s)}).catch(() => {$('map').textContent = 'Kakao SDK 로드 실패: 키와 사이트 도메인 등록을 확인하세요.'});
+            if (window.kakao) kakao.maps.load(() => {
+                const map = new kakao.maps.Map($('map'), {center: new kakao.maps.LatLng(37.55, 126.99), level: 8}), info = new kakao.maps.InfoWindow({zIndex: 2}), M = [];
+                R.forEach(s => {
+                    const pos = new kakao.maps.LatLng(s.lat, s.lon), dot = document.createElement('div');
+                    dot.style.cssText = `width:18px;height:18px;border-radius:50%;background:${s.lv.c};border:2px solid #fff;cursor:pointer`;
+                    const open = () => {info.setContent(`<div style="padding:8px;font-size:13px;color:#000;min-width:190px"><b>${s.name}</b><br>위험 점수 ${s.score.toFixed(0)} (${s.lv.n})<br>수위 ${s.wl ?? '—'}m · 시간강수 ${s.rain1h ?? '—'}mm</div>`); info.setPosition(pos); info.open(map)};
+                    dot.onclick = open; new kakao.maps.CustomOverlay({map, position: pos, content: dot}); M.push({s, pos, open})
+                });
+                $('q').onchange = e => {const m = M.find(x => x.s.name.includes(e.target.value.trim())); if (m) {map.setCenter(m.pos); map.setLevel(4); m.open()} }
+            })
+        }
+    </script>
+</body>
+
+</html>
