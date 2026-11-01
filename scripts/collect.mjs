@@ -23,12 +23,15 @@ if (process.argv[1]?.endsWith('collect.mjs')) {
   const prev = fs.existsSync(OUT) ? JSON.parse(fs.readFileSync(OUT)) : { stations: [] };
   const pm = Object.fromEntries(prev.stations.map(s => [s.code, s])), wx = {}, errors = [], stations = [];
   for (const o of info) {
-    const s = { code: o.wlobscd, name: o.obsnm, lat: +dms(o.lat).toFixed(5), lon: +dms(o.lon).toFixed(5), gdt: num(o.gdt),
-      levels: { att: num(o.attwl), wrn: num(o.wrnwl), alm: num(o.almwl), srs: num(o.srswl) }, wl: null, wlTime: null, rain1h: null, rain24: null, hist: pm[o.wlobscd]?.hist || [] };
+    const s = {
+      code: o.wlobscd, name: o.obsnm, lat: +dms(o.lat).toFixed(5), lon: +dms(o.lon).toFixed(5), gdt: num(o.gdt),
+      levels: { att: num(o.attwl), wrn: num(o.wrnwl), alm: num(o.almwl), srs: num(o.srswl) }, wl: null, wlTime: null, wseries: [], rain1h: null, rain24: null, hist: pm[o.wlobscd]?.hist || []
+    };
     try { // 필드명(ymdhm, wl)은 응답 확인 후 필요하면 수정
       const d = (await j(`${H}/waterlevel/list/10M/${o.wlobscd}.json`)).content || [];
       const last = d.sort((a, b) => String(b.ymdhm).localeCompare(String(a.ymdhm))).find(x => num(x.wl) != null);
       if (last) { s.wl = num(last.wl); s.wlTime = last.ymdhm; }
+      s.wseries = d.slice(0, 72).map(x => ({ t: String(x.ymdhm), v: num(x.wl) })).filter(x => x.v != null); // 최신순
     } catch (e) { errors.push(`수위 ${o.wlobscd}: ${e.message}`); }
     const g = grid(s.lat, s.lon), k = g.nx + ',' + g.ny;
     if (!(k in wx)) {

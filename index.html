@@ -25,16 +25,16 @@
         </div>
     </main>
     <script type="module">
-        import {load, shell, badge, rows, lvTag} from './js/app.js'; import {LEVELS, levelOf} from './js/riskCalculator.js';
+        import { load, shell, badge, rows, lvTag } from './js/app.js'; import { LEVELS, levelOf } from './js/riskCalculator.js';
         shell('index.html'); const d = await load(), $ = id => document.getElementById(id); $('b').innerHTML = badge(d);
         const R = d ? rows(d) : [];
-        if (!R.length) {$('cards').innerHTML = '<div class="card">표시할 데이터가 없습니다. data/live.json 수집 상태를 확인하세요.</div>'} else {
+        if (!R.length) { $('cards').innerHTML = '<div class="card">표시할 데이터가 없습니다. data/live.json 수집 상태를 확인하세요.</div>' } else {
             Chart.defaults.color = '#93a8cc';
             const avg = R.reduce((a, r) => a + r.score, 0) / R.length, mx = Math.max(...R.map(r => r.rain1h ?? 0)), cnt = LEVELS.map(l => R.filter(r => r.lv === l).length);
             const c = (t, v) => `<div class="card"><h3>${t}</h3><div class="big">${v}</div></div>`;
             $('cards').innerHTML = c('조회 지역', '서울 · 관측소 ' + R.length + '곳') + c('최대 시간 강수량', mx + ' mm') + c('종합 위험도', avg.toFixed(0) + '점 ' + lvTag(levelOf(avg))) + c('단계별 지역 수', LEVELS.map((l, i) => `<span style="color:${l.c}">${l.n} ${cnt[i]}</span>`).join(' '));
             $('top').innerHTML = '<tr><th>관측소</th><th>점수</th><th>단계</th></tr>' + R.slice(0, 5).map(r => `<tr><td>${r.name}</td><td>${r.score.toFixed(0)}</td><td>${lvTag(r.lv)}</td></tr>`).join('');
-            new Chart($('ch'), {type: 'bar', data: {labels: R.map(r => r.name.replace('서울시', '')), datasets: [{data: R.map(r => +r.score.toFixed(1)), backgroundColor: R.map(r => r.lv.c)}]}, options: {plugins: {legend: {display: false}}, scales: {y: {max: 100, beginAtZero: true}}}});
+            new Chart($('ch'), { type: 'bar', data: { labels: R.map(r => r.name.replace('서울시', '')), datasets: [{ data: R.map(r => +r.score.toFixed(1)), backgroundColor: R.map(r => r.lv.c) }] }, options: { plugins: { legend: { display: false } }, scales: { y: { max: 100, beginAtZero: true } } } });
         }
     </script>
 </body>
