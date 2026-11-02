@@ -1,42 +1,17 @@
-<!doctype html>
-<html lang="ko">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="css/style.css">
-    <title>FloodGuard 대시보드</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-</head>
-
-<body>
-    <main>
-        <h2>도시 침수 위험 분석 <span id="b"></span></h2>
-        <p class="note">입력 데이터와 설정된 가중치에 기반한 위험도 평가이며, 실제 침수 발생을 예측하지 않습니다.</p>
-        <div class="grid" id="cards"></div>
-        <div class="grid" style="margin-top:12px">
-            <div class="card">
-                <h3>침수 위험 지역 TOP 5</h3>
-                <table id="top"></table>
-            </div>
-            <div class="card">
-                <h3>관측소별 위험 점수</h3><canvas id="ch"></canvas>
-            </div>
-        </div>
-    </main>
-    <script type="module">
-        import { load, shell, badge, rows, lvTag } from './js/app.js'; import { LEVELS, levelOf } from './js/riskCalculator.js';
-        shell('index.html'); const d = await load(), $ = id => document.getElementById(id); $('b').innerHTML = badge(d);
-        const R = d ? rows(d) : [];
-        if (!R.length) { $('cards').innerHTML = '<div class="card">표시할 데이터가 없습니다. data/live.json 수집 상태를 확인하세요.</div>' } else {
-            Chart.defaults.color = '#93a8cc';
-            const avg = R.reduce((a, r) => a + r.score, 0) / R.length, mx = Math.max(...R.map(r => r.rain1h ?? 0)), cnt = LEVELS.map(l => R.filter(r => r.lv === l).length);
-            const c = (t, v) => `<div class="card"><h3>${t}</h3><div class="big">${v}</div></div>`;
-            $('cards').innerHTML = c('조회 지역', '서울 · 관측소 ' + R.length + '곳') + c('최대 시간 강수량', mx + ' mm') + c('종합 위험도', avg.toFixed(0) + '점 ' + lvTag(levelOf(avg))) + c('단계별 지역 수', LEVELS.map((l, i) => `<span style="color:${l.c}">${l.n} ${cnt[i]}</span>`).join(' '));
-            $('top').innerHTML = '<tr><th>관측소</th><th>점수</th><th>단계</th></tr>' + R.slice(0, 5).map(r => `<tr><td>${r.name}</td><td>${r.score.toFixed(0)}</td><td>${lvTag(r.lv)}</td></tr>`).join('');
-            new Chart($('ch'), { type: 'bar', data: { labels: R.map(r => r.name.replace('서울시', '')), datasets: [{ data: R.map(r => +r.score.toFixed(1)), backgroundColor: R.map(r => r.lv.c) }] }, options: { plugins: { legend: { display: false } }, scales: { y: { max: 100, beginAtZero: true } } } });
-        }
-    </script>
-</body>
-
-</html>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="css/style.css"><title>FloodGuard 대시보드</title><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script></head><body><main>
+<h2>도시 침수 위험 분석 <span id="b"></span></h2>
+<p class="note">입력 데이터와 설정된 가중치에 기반한 위험도 평가이며, 실제 침수 발생을 예측하지 않습니다.</p>
+<div id="warn" class="note" style="color:#fbbf24;margin:6px 0"></div><div class="grid" id="cards"></div>
+<div class="grid" style="margin-top:12px"><div class="card"><h3>침수 위험 지역 TOP 5</h3><table id="top"></table></div><div class="card"><h3>관측소별 위험 점수</h3><canvas id="ch"></canvas></div></div>
+</main><script type="module">
+import {load,shell,badge,rows,lvTag} from './js/app.js';import {LEVELS,levelOf} from './js/riskCalculator.js';
+shell('index.html');const d=await load(),$=id=>document.getElementById(id);$('b').innerHTML=badge(d);
+const R=d?rows(d):[];
+if(!R.length){$('cards').innerHTML='<div class="card">표시할 데이터가 없습니다. data/live.json 수집 상태를 확인하세요.</div>'}else{
+Chart.defaults.color='#93a8cc';const np=R.filter(r=>r.partial).length;if(np)$('warn').textContent='⚠ 관측소 '+np+'곳은 수위 데이터가 없어 수위 점수를 0으로 계산한 참고 점수입니다.';
+const avg=R.reduce((a,r)=>a+r.score,0)/R.length,mx=Math.max(...R.map(r=>r.rain1h??0)),cnt=LEVELS.map(l=>R.filter(r=>r.lv===l).length);
+const c=(t,v)=>`<div class="card"><h3>${t}</h3><div class="big">${v}</div></div>`;
+$('cards').innerHTML=c('조회 지역','서울 · 관측소 '+R.length+'곳')+c('최대 시간 강수량',mx+' mm')+c('종합 위험도',avg.toFixed(0)+'점 '+lvTag(levelOf(avg)))+c('단계별 지역 수',LEVELS.map((l,i)=>`<span style="color:${l.c}">${l.n} ${cnt[i]}</span>`).join(' '));
+$('top').innerHTML='<tr><th>관측소</th><th>점수</th><th>단계</th></tr>'+R.slice(0,5).map(r=>`<tr><td>${r.name}</td><td>${r.score.toFixed(0)}</td><td>${lvTag(r.lv)}</td></tr>`).join('');
+new Chart($('ch'),{type:'bar',data:{labels:R.map(r=>r.name.replace('서울시','')),datasets:[{data:R.map(r=>+r.score.toFixed(1)),backgroundColor:R.map(r=>r.lv.c)}]},options:{plugins:{legend:{display:false}},scales:{y:{max:100,beginAtZero:true}}}});}
+</script></body></html>

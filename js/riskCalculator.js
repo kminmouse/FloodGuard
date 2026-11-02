@@ -22,10 +22,10 @@ export function levelScore(wl, t) {
 }
 // 관측소 표고(gdt)가 낮을수록 취약하다는 단순 가정(관측소 간 상대값)
 export const terrainScore = (g, min, max) => g == null ? null : max === min ? 50 : 100 * (1 - (g - min) / (max - min));
-// 점수가 없는 항목(예: 침수 이력 미연동)은 제외하고 가중치를 재정규화
+// 침수 이력(미연동)만 가중치에서 제외해 재정규화한다. 수위가 없으면 0점으로 두어 표고만으로 위험이 높게 나오는 것을 막는다.
 export function total(p) {
   let s = 0, w = 0;
-  for (const k in WEIGHTS) if (p[k] != null) { s += p[k] * WEIGHTS[k]; w += WEIGHTS[k]; }
+  for (const k in WEIGHTS) { if (k === 'history' && p.history == null) continue; s += (p[k] ?? 0) * WEIGHTS[k]; w += WEIGHTS[k]; }
   return w ? s / w : null;
 }
 export function ctxOf(sts) { const g = sts.map(s => s.gdt).filter(v => v != null); return { gmin: Math.min(...g), gmax: Math.max(...g) }; }
@@ -33,5 +33,5 @@ export function evaluate(st, ctx, ov = {}) {
   const h = ov.h ?? st.rain1h ?? 0, cum = ov.cum ?? st.rain24 ?? 0, dur = ov.dur ?? 3, wl = ov.wl ?? st.wl;
   const parts = { rain: rainScore(h, cum, dur), level: levelScore(wl, st.levels), history: null, terrain: terrainScore(st.gdt, ctx.gmin, ctx.gmax) };
   const score = total(parts);
-  return { parts, score, lv: levelOf(score) };
+  return { parts, score, lv: levelOf(score), partial: parts.level == null };
 }

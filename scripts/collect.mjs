@@ -24,16 +24,14 @@ if (process.argv[1]?.endsWith('collect.mjs')) {
   const prev = fs.existsSync(OUT) ? JSON.parse(fs.readFileSync(OUT)) : { stations: [] };
   const pm = Object.fromEntries(prev.stations.map(s => [s.code, s])), wx = {}, errors = [], stations = [];
   for (const o of info) {
-    const s = {
-      code: o.wlobscd, name: o.obsnm, lat: +dms(o.lat).toFixed(5), lon: +dms(o.lon).toFixed(5), gdt: num(o.gdt),
-      levels: { att: num(o.attwl), wrn: num(o.wrnwl), alm: num(o.almwl), srs: num(o.srswl) }, wl: null, wlTime: null, wseries: [], rain1h: null, rain24: null, hist: pm[o.wlobscd]?.hist || []
-    };
+    const s = { code: o.wlobscd, name: o.obsnm, lat: +dms(o.lat).toFixed(5), lon: +dms(o.lon).toFixed(5), gdt: num(o.gdt),
+      levels: { att: num(o.attwl), wrn: num(o.wrnwl), alm: num(o.almwl), srs: num(o.srswl) }, wl: null, wlTime: null, wseries: [], rain1h: null, rain24: null, hist: pm[o.wlobscd]?.hist || [] };
     try { // 필드명(ymdhm, wl)은 응답 확인 후 필요하면 수정
       let d = []; // 기간 지정 조회(최근 12시간)를 먼저 시도하고, 실패하거나 1건 이하면 기본 조회로 대체
-      try { d = (await j(`${H}/waterlevel/list/10M/${o.wlobscd}/${kt(Date.now() - 12 * 36e5)}/${kt(Date.now())}.json`)).content || []; } catch { }
-      if (d.length < 2) d = (await j(`${H}/waterlevel/list/10M/${o.wlobscd}.json`)).content || [];
+      try { d = (await j(`${H}/waterlevel/list/10M/${o.wlobscd}/${kt(Date.now() - 12 * 36e5)}/${kt(Date.now())}.json`)).content || []; } catch {}
+      if (!d.some(x => num(x.wl) != null)) d = (await j(`${H}/waterlevel/list/10M/${o.wlobscd}.json`)).content || []; // 범위 조회에 유효한 수위가 없으면 기본 조회로 대체
       const last = d.sort((a, b) => String(b.ymdhm).localeCompare(String(a.ymdhm))).find(x => num(x.wl) != null);
-      if (last) { s.wl = num(last.wl); s.wlTime = last.ymdhm; }
+      if (last) { s.wl = num(last.wl); s.wlTime = last.ymdhm; } else errors.push(`수위 ${o.wlobscd}: 유효한 wl 없음(응답 ${d.length}건)`);
       s.wseries = d.slice(0, 72).map(x => ({ t: String(x.ymdhm), v: num(x.wl) })).filter(x => x.v != null); // 최신순
     } catch (e) { errors.push(`수위 ${o.wlobscd}: ${e.message}`); }
     const g = grid(s.lat, s.lon), k = g.nx + ',' + g.ny;

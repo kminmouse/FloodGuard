@@ -1,6 +1,6 @@
 {
  "source": "live",
- "generatedAt": "2026-11-02 15:47 KST",
+ "generatedAt": "2026-11-02 16:05 KST",
  "baseTime": "202611021500",
  "stations": [
   {
@@ -15,9 +15,14 @@
     "alm": 10.6,
     "srs": 13
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 1.14,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 1.14
+    }
+   ],
    "rain1h": 0,
    "rain24": 0.5,
    "hist": [
@@ -47,9 +52,14 @@
     "alm": 7.1,
     "srs": 8.5
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 1.71,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 1.71
+    }
+   ],
    "rain1h": 0,
    "rain24": 0,
    "hist": [
@@ -79,9 +89,14 @@
     "alm": 11.1,
     "srs": 13.5
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 1.36,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 1.36
+    }
+   ],
    "rain1h": 0,
    "rain24": 0.5,
    "hist": [
@@ -111,9 +126,14 @@
     "alm": 12.6,
     "srs": 15.5
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 1,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 1
+    }
+   ],
    "rain1h": 0,
    "rain24": 1,
    "hist": [
@@ -143,9 +163,14 @@
     "alm": 6.5,
     "srs": 7.9
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 0.51,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 0.51
+    }
+   ],
    "rain1h": 0,
    "rain24": 0,
    "hist": [
@@ -175,9 +200,14 @@
     "alm": 5.1,
     "srs": 6.2
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 0.25,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 0.25
+    }
+   ],
    "rain1h": 0,
    "rain24": 0,
    "hist": [
@@ -207,9 +237,14 @@
     "alm": 6.5,
     "srs": 7.9
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 0.45,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 0.45
+    }
+   ],
    "rain1h": 0,
    "rain24": 1,
    "hist": [
@@ -239,9 +274,14 @@
     "alm": 6.2,
     "srs": 6.5
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 2.73,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 2.73
+    }
+   ],
    "rain1h": 0,
    "rain24": 1,
    "hist": [
@@ -271,9 +311,14 @@
     "alm": 10.5,
     "srs": 13.3
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 0.58,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 0.58
+    }
+   ],
    "rain1h": 0,
    "rain24": 0.5,
    "hist": [
@@ -303,9 +348,14 @@
     "alm": 4.6,
     "srs": 5.3
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 2.12,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 2.12
+    }
+   ],
    "rain1h": 0,
    "rain24": 1,
    "hist": [
@@ -335,9 +385,14 @@
     "alm": 4.8,
     "srs": 5.4
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 2.42,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 2.42
+    }
+   ],
    "rain1h": 0,
    "rain24": 0,
    "hist": [
@@ -367,9 +422,14 @@
     "alm": 4.5,
     "srs": 4.9
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 0.53,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 0.53
+    }
+   ],
    "rain1h": 0,
    "rain24": 0.5,
    "hist": [
@@ -399,9 +459,14 @@
     "alm": 9,
     "srs": 11
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 0.65,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 0.65
+    }
+   ],
    "rain1h": 0,
    "rain24": 0.5,
    "hist": [
@@ -431,9 +496,14 @@
     "alm": 3.2,
     "srs": 4
    },
-   "wl": null,
-   "wlTime": null,
-   "wseries": [],
+   "wl": 0.06,
+   "wlTime": "202611021600",
+   "wseries": [
+    {
+     "t": "202611021600",
+     "v": 0.06
+    }
+   ],
    "rain1h": 0,
    "rain24": 0,
    "hist": [
