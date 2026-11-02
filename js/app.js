@@ -8,11 +8,11 @@ export async function load() {
       const d = await r.json();
       if (!d.stations?.length) continue;
       const res = { ...d, mode };
-      try { localStorage.setItem('fg_last', JSON.stringify(res)); } catch {}
+      try { localStorage.setItem('fg_last', JSON.stringify(res)); } catch { }
       return res;
-    } catch {}
+    } catch { }
   }
-  try { const c = localStorage.getItem('fg_last'); if (c) return { ...JSON.parse(c), cached: true }; } catch {}
+  try { const c = localStorage.getItem('fg_last'); if (c) return { ...JSON.parse(c), cached: true }; } catch { }
   return null;
 }
 export function shell(active) {
@@ -20,9 +20,9 @@ export function shell(active) {
 }
 export const badge = d => !d ? '<span class="badge demo">데이터 없음</span>'
   : d.mode === 'live' ? `<span class="badge live">실제 API 데이터 · 수집 ${d.generatedAt}${d.cached ? ' (캐시)' : ''}</span>`
-  : `<span class="badge demo">데모 데이터 · 실제 API 아님${d.cached ? ' (캐시)' : ''}</span>`;
+    : `<span class="badge demo">데모 데이터 · 실제 API 아님${d.cached ? ' (캐시)' : ''}</span>`;
 export function rows(d) {
-  const ctx = ctxOf(d.stations);
+  const ctx = ctxOf(d.stations, d.floodMax);
   return d.stations.map(s => ({ ...s, ...evaluate(s, ctx) })).filter(r => r.score != null).sort((a, b) => b.score - a.score);
 }
 export const lvTag = l => `<span class="lv" style="background:${l.c}">${l.n}</span>`;

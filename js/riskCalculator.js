@@ -22,16 +22,18 @@ export function levelScore(wl, t) {
 }
 // 관측소 표고(gdt)가 낮을수록 취약하다는 단순 가정(관측소 간 상대값)
 export const terrainScore = (g, min, max) => g == null ? null : max === min ? 50 : 100 * (1 - (g - min) / (max - min));
-// 침수 이력(미연동)만 가중치에서 제외해 재정규화한다. 수위가 없으면 0점으로 두어 표고만으로 위험이 높게 나오는 것을 막는다.
+// 침수 취약도(자료 없는 구)만 가중치에서 제외해 재정규화한다. 수위가 없으면 0점으로 두어 표고만으로 위험이 높게 나오는 것을 막는다.
 export function total(p) {
   let s = 0, w = 0;
   for (const k in WEIGHTS) { if (k === 'history' && p.history == null) continue; s += (p[k] ?? 0) * WEIGHTS[k]; w += WEIGHTS[k]; }
   return w ? s / w : null;
 }
-export function ctxOf(sts) { const g = sts.map(s => s.gdt).filter(v => v != null); return { gmin: Math.min(...g), gmax: Math.max(...g) }; }
+// 도시침수지도 기반 침수 취약도: 서울 전체 구 중 최댓값 대비 비율(자료가 없으면 null)
+export const floodScore = (v, max) => v == null || !max ? null : clamp(v / max * 100);
+export function ctxOf(sts, fmax) { const g = sts.map(s => s.gdt).filter(v => v != null); return { gmin: Math.min(...g), gmax: Math.max(...g), fmax }; }
 export function evaluate(st, ctx, ov = {}) {
   const h = ov.h ?? st.rain1h ?? 0, cum = ov.cum ?? st.rain24 ?? 0, dur = ov.dur ?? 3, wl = ov.wl ?? st.wl;
-  const parts = { rain: rainScore(h, cum, dur), level: levelScore(wl, st.levels), history: null, terrain: terrainScore(st.gdt, ctx.gmin, ctx.gmax) };
+  const parts = { rain: rainScore(h, cum, dur), level: levelScore(wl, st.levels), history: floodScore(st.floodVol, ctx.fmax), terrain: terrainScore(st.gdt, ctx.gmin, ctx.gmax) };
   const score = total(parts);
   return { parts, score, lv: levelOf(score), partial: parts.level == null };
 }

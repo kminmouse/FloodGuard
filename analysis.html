@@ -44,13 +44,14 @@
             <h3>지역별 상세 분석</h3>
             <div id="dt"></div>
         </div>
+        <p class="note">도시침수 통계 출처: 기후에너지환경부 한강홍수통제소(공공데이터포털). 구 단위 시뮬레이션 지도 통계이며 실제 침수 이력이 아닙니다.</p>
     </main>
     <script type="module">
         import { load, shell, badge, rows, lvTag } from './js/app.js'; import { evaluate, ctxOf, WEIGHTS, LEVELS } from './js/riskCalculator.js';
         shell('analysis.html'); const d = await load(), $ = id => document.getElementById(id); $('b').innerHTML = badge(d);
         const R = d ? rows(d) : [];
         if (!R.length) { $('res').textContent = '데이터 없음' } else {
-            Chart.defaults.color = '#93a8cc'; const ctx = ctxOf(d.stations); let chart;
+            Chart.defaults.color = '#93a8cc'; const ctx = ctxOf(d.stations, d.floodMax); let chart;
             $('st').innerHTML = R.map(r => `<option value="${r.code}">${r.name}</option>`).join('');
             const S = () => R.find(r => r.code === $('st').value), V = id => +document.getElementById(id).value;
             function build() {
@@ -64,7 +65,7 @@
                 const ov = { h: V('h'), cum: V('cum'), wl: V('wl'), dur: V('dur') }, a = evaluate(s, ctx, ov);
                 $('res').innerHTML = `${s.score.toFixed(0)} ${lvTag(s.lv)} → ${a.score.toFixed(0)} ${lvTag(a.lv)}`;
                 const p = a.parts, fx = v => v == null ? '—(데이터 없음)' : v.toFixed(0);
-                $('det').innerHTML = `강수 ${fx(p.rain)} · 수위 ${fx(p.level)} · 지형 ${fx(p.terrain)} · 침수 이력 ${fx(p.history)}(미연동, 가중치 재정규화)<br>${s.lv === a.lv ? '위험 단계 변화 없음' : '위험 단계: ' + s.lv.n + ' → ' + a.lv.n}`;
+                $('det').innerHTML = `강수 ${fx(p.rain)} · 수위 ${fx(p.level)} · 지형 ${fx(p.terrain)} · 침수 취약 ${fx(p.history)}(자료 없는 구는 제외 후 가중치 재정규화)<br>${s.lv === a.lv ? '위험 단계 변화 없음' : '위험 단계: ' + s.lv.n + ' → ' + a.lv.n}`;
                 const xs = [...Array(21).keys()].map(i => i * 5), ys = xs.map(x => +evaluate(s, ctx, { ...ov, h: x }).score.toFixed(1)), cx = Math.round(ov.h / 5) * 5;
                 const ds = [{ label: '위험 점수', data: ys, borderColor: '#60a5fa', tension: .2 }, { label: '현재 입력', data: xs.map((x, i) => x === cx ? a.score : null), pointRadius: 7, showLine: false, backgroundColor: a.lv.c }];
                 if (chart) { chart.data.datasets = ds; chart.update() } else chart = new Chart($('ch'), { type: 'line', data: { labels: xs, datasets: ds }, options: { scales: { y: { min: 0, max: 100 }, x: { title: { display: true, text: '시간당 강수량(mm)' } } } } })
@@ -74,7 +75,7 @@
             ch('c4', { type: 'doughnut', data: { labels: LEVELS.map(l => l.n), datasets: [{ data: LEVELS.map(l => R.filter(r => r.lv === l).length), backgroundColor: LEVELS.map(l => l.c) }] } });
             const GUIDE = { 안전: '평상시처럼 이용하되 기상 상황을 수시로 확인하세요.', 관심: '하천변 산책로와 저지대 주차 차량 상황을 확인하고 기상 특보를 살펴보세요.', 주의: '하천변 접근과 지하 공간 이용을 피하고 대피 경로를 미리 확인하세요.', 위험: '하천변·지하차도·반지하 등 저지대에서 벗어나 높은 곳으로 이동하고 재난 문자와 지자체 안내를 따르세요.' };
             function detail() {
-                const s = S(), N = { rain: '강수', level: '수위', history: '침수 이력', terrain: '지형' }, fx = v => v == null ? '—' : v.toFixed(0), L = s.levels;
+                const s = S(), N = { rain: '강수', level: '수위', history: '침수 취약(도시침수지도)', terrain: '지형' }, fx = v => v == null ? '—' : v.toFixed(0), L = s.levels;
                 $('dt').innerHTML = `<div class="grid"><div><b>${s.name}</b><div class="note">위치 ${s.lat}, ${s.lon} · 관측소 표고 ${s.gdt ?? '—'}m<br>기준 수위(m) 관심 ${L.att ?? '—'} · 주의 ${L.wrn ?? '—'} · 경계 ${L.alm ?? '—'} · 심각 ${L.srs ?? '—'}<br>현재 수위 ${s.wl ?? '—'}m · 시간 강수 ${s.rain1h ?? '—'}mm · 누적 ${s.rain24 ?? '—'}mm</div></div><table><tr><th>항목</th><th>점수</th><th>가중치</th></tr>${Object.keys(N).map(k => `<tr><td>${N[k]}</td><td>${fx(s.parts[k])}</td><td>${s.parts[k] == null ? '제외' : WEIGHTS[k]}</td></tr>`).join('')}</table><div>${lvTag(s.lv)} <span class="note">일반적인 행동 요령</span><br>${GUIDE[s.lv.n]}</div></div>`
             }
             function series() {
