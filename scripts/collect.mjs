@@ -4,6 +4,7 @@ const HK = process.env.HRFCO_KEY, SK = process.env.DATA_GO_KR_KEY, OUT = 'data/l
 if (!HK || !SK) { console.error('Secrets 누락: HRFCO_KEY, DATA_GO_KR_KEY'); process.exit(1); }
 const dms = s => { const [d, m, x] = s.trim().split('-').map(Number); return d + m / 60 + x / 3600; };
 const num = v => { const n = parseFloat(String(v ?? '').trim()); return Number.isFinite(n) ? n : null; };
+const kt = ms => new Date(ms + 9 * 36e5).toISOString().slice(0, 16).replace(/[-T:]/g, ''); // KST yyyymmddhhmm
 const j = async u => { const r = await fetch(u); if (!r.ok) throw new Error(r.status + ' ' + u.replaceAll(HK, '***').replace(/serviceKey=[^&]+/, 'serviceKey=***')); return r.json(); };
 // 기상청 격자(nx, ny) 변환 (Lambert Conformal Conic, 5km)
 export function grid(lat, lon) {
@@ -28,7 +29,9 @@ if (process.argv[1]?.endsWith('collect.mjs')) {
       levels: { att: num(o.attwl), wrn: num(o.wrnwl), alm: num(o.almwl), srs: num(o.srswl) }, wl: null, wlTime: null, wseries: [], rain1h: null, rain24: null, hist: pm[o.wlobscd]?.hist || []
     };
     try { // 필드명(ymdhm, wl)은 응답 확인 후 필요하면 수정
-      const d = (await j(`${H}/waterlevel/list/10M/${o.wlobscd}.json`)).content || [];
+      let d = []; // 기간 지정 조회(최근 12시간)를 먼저 시도하고, 실패하거나 1건 이하면 기본 조회로 대체
+      try { d = (await j(`${H}/waterlevel/list/10M/${o.wlobscd}/${kt(Date.now() - 12 * 36e5)}/${kt(Date.now())}.json`)).content || []; } catch { }
+      if (d.length < 2) d = (await j(`${H}/waterlevel/list/10M/${o.wlobscd}.json`)).content || [];
       const last = d.sort((a, b) => String(b.ymdhm).localeCompare(String(a.ymdhm))).find(x => num(x.wl) != null);
       if (last) { s.wl = num(last.wl); s.wlTime = last.ymdhm; }
       s.wseries = d.slice(0, 72).map(x => ({ t: String(x.ymdhm), v: num(x.wl) })).filter(x => x.v != null); // 최신순
